@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Category</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-4">
+
+<!-- Back Button -->
+<button onclick="history.back()" class="mb-4 bg-black text-white px-4 py-2 rounded">
+  ← Back
+</button>
+
+<h1 id="title" class="text-3xl font-bold mb-6"></h1>
+
+<div id="items" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
+
+<!-- Cart -->
+<div class="bg-white p-4 rounded-2xl shadow mt-6">
+  <h2 class="text-xl font-semibold mb-2">🛒 Your Order</h2>
+  <div id="cart"></div>
+  <h3 class="text-lg font-bold mt-2">Total: ₹<span id="total">0</span></h3>
+
+  <button onclick="sendWhatsApp()" class="mt-4 w-full bg-green-500 text-white py-2 rounded-xl">
+    Order on WhatsApp
+  </button>
+</div>
+
+<script>
+// WhatsApp Number
+const phone = "917502382224";
+
+// Get category from URL
+const params = new URLSearchParams(window.location.search);
+const category = params.get("cat");
+document.getElementById("title").innerText = category;
+
+// Full Menu Data
+const menuData = {
+  "Brownies": [
+    {name:"Classic Brownie", price:450, img:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c"},
+    {name:"Nuts Brownie", price:480, img:"https://images.unsplash.com/photo-1589307004394-3b3c0f7e2b8a"},
+    {name:"Double Chocolate Brownie", price:500, img:"https://images.unsplash.com/photo-1605478371310-a9f1e96b2d1d"},
+    {name:"Triple Chocolate Brownie", price:550, img:"https://images.unsplash.com/photo-1599785209707-28b2a7d9aef0"},
+    {name:"Oreo Brownie", price:550, img:"https://images.unsplash.com/photo-1612197528255-5c0d36d6e5b6"},
+    {name:"Nutella Brownie", price:650, img:"https://images.unsplash.com/photo-1614707267537-b85aaf00c4b7"},
+    {name:"Lotus Biscoff Brownie", price:750, img:"https://images.unsplash.com/photo-1625944525903-bf2f4c5f9c75"},
+    {name:"Lava Brownie", price:780, img:"https://images.unsplash.com/photo-1600891964599-f61ba0e24092"}
+  ],
+  "Pizza": [
+    {name:"Veg Pizza", price:280, img:"https://images.unsplash.com/photo-1548365328-9f547fb0953b"},
+    {name:"Non Veg Pizza", price:350, img:"https://images.unsplash.com/photo-1594007654729-407eedc4be65"},
+    {name:"Cheesy Pizza", price:380, img:"https://images.unsplash.com/photo-1601924928376-7eec4e6c9c88"},
+    {name:"Lava Pizza", price:450, img:"https://images.unsplash.com/photo-1513104890138-7c749659a591"}
+  ],
+  "Bomboloni": [
+    {name:"Classic Sugar Bomboloni", price:80, img:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d"},
+    {name:"Chocolate Cream Bomboloni", price:100, img:"https://images.unsplash.com/photo-1605478522926-1f6f0c8a5d6e"},
+    {name:"Nutella Bomboloni", price:120, img:"https://images.unsplash.com/photo-1613145997970-db84a7975fbb"},
+    {name:"White Chocolate Bomboloni", price:110, img:"https://images.unsplash.com/photo-1627308595229-7830a5c91f9f"}
+  ],
+  "Cookies": [
+    {name:"Butter Cookies", price:180, img:"https://images.unsplash.com/photo-1499636136210-6f4ee915583e"},
+    {name:"Chocolate Chip Cookies", price:220, img:"https://images.unsplash.com/photo-1599785209707-28b2a7d9aef0"},
+    {name:"Double Chocolate Cookies", price:240, img:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c"},
+    {name:"Almond Cookies", price:260, img:"https://images.unsplash.com/photo-1558961363-fa8fdf82db35"}
+  ],
+  "Cakes": [
+    {name:"Vanilla Cake", price:800, img:"https://images.unsplash.com/photo-1578985545062-69928b1d9587"},
+    {name:"Black Forest Cake", price:900, img:"https://images.unsplash.com/photo-1605478574706-6c9b7d5f5b36"},
+    {name:"White Forest Cake", price:950, img:"https://images.unsplash.com/photo-1621303837174-89787a7d4729"},
+    {name:"Chocolate Cake", price:1250, img:"https://images.unsplash.com/photo-1571115764595-644a1f56a55c"},
+    {name:"Butterscotch Cake", price:1200, img:"https://images.unsplash.com/photo-1559628233-100c798642d4"},
+    {name:"Red Velvet Cake", price:1500, img:"https://images.unsplash.com/photo-1603532648955-039310d9ed75"},
+    {name:"Rasamalai Cake", price:1300, img:"https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5"},
+    {name:"Biscoff Cake", price:1600, img:"https://images.unsplash.com/photo-1608198093002-ad4e005484ec"},
+    {name:"Choco Truffle Cake", price:1600, img:"https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62"}
+  ]
+};
+
+// CART
+const cart = {};
+
+// Render items
+const itemsDiv = document.getElementById("items");
+
+menuData[category].forEach((item, index) => {
+  itemsDiv.innerHTML += `
+    <div class="bg-white rounded-2xl shadow overflow-hidden hover:scale-105 transition">
+      <img src="${item.img}" class="w-full h-40 object-cover">
+      <div class="p-4 flex flex-col justify-between">
+        <h3 class="font-semibold text-lg mb-1">${item.name}</h3>
+        <p class="text-yellow-600 font-bold mb-2">₹${item.price}</p>
+        <input type="number" min="0" value="0"
+          onchange="updateCart(${index}, this.value)"
+          class="border w-16 p-1 rounded">
+      </div>
+    </div>
+  `;
+});
+
+// Update cart
+function updateCart(index, qty){
+  qty = parseInt(qty);
+  if(qty>0) cart[index] = qty; else delete cart[index];
+  renderCart();
+}
+
+// Render cart
+function renderCart(){
+  let total=0;
+  const cartDiv = document.getElementById("cart");
+  cartDiv.innerHTML="";
+  for(let i in cart){
+    const item = menuData[category][i];
+    const qty = cart[i];
+    const cost = qty * item.price;
+    total += cost;
+    cartDiv.innerHTML += `<div>${item.name} x ${qty} = ₹${cost}</div>`;
+  }
+  document.getElementById("total").innerText = total;
+}
+
+// WhatsApp integration
+function sendWhatsApp(){
+  let msg = "🛒 *DJ Brownies Order*%0A%0A";
+  let total = 0;
+  for(let i in cart){
+    const item = menuData[category][i];
+    const qty = cart[i];
+    const cost = qty * item.price;
+    total += cost;
+    msg += `${item.name} x ${qty} = ₹${cost}%0A`;
+  }
+  msg += `%0ATotal: ₹${total}`;
+  window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+}
+</script>
+
+</body>
+</html>
