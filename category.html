@@ -19,20 +19,61 @@
 <div id="items" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
 
 <!-- Cart -->
-<div class="bg-white p-4 rounded-2xl shadow mt-6">
-  <h2 class="text-xl font-semibold mb-2">🛒 Your Order</h2>
-  <div id="cart"></div>
-  <h3 class="text-lg font-bold mt-2">Total: ₹<span id="total">0</span></h3>
+<!-- Customer Details Form -->
+<!-- Customer Details Form -->
+<div class="mt-4">
+  <label for="customerName" class="block font-medium mb-1">👤 Name</label>
+  <input type="text" id="customerName" placeholder="Enter your name" class="w-full border p-2 rounded mb-2">
 
-  <button onclick="sendWhatsApp()" class="mt-4 w-full bg-green-500 text-white py-2 rounded-xl">
+  <label for="customerMobile" class="block font-medium mb-1">📱 Mobile Number</label>
+  <input type="tel" id="customerMobile" placeholder="Enter your mobile number" class="w-full border p-2 rounded mb-2">
+
+  <label for="customerAddress" class="block font-medium mb-1">🏠 Delivery Address</label>
+  <textarea id="customerAddress" placeholder="Enter full delivery address" class="w-full border p-2 rounded mb-2" rows="3"></textarea>
+
+  <!-- WhatsApp Order Button -->
+  <button onclick="sendWhatsApp()" class="mt-4 w-full bg-green-500 text-white py-2 rounded-xl font-bold hover:bg-green-600">
     Order on WhatsApp
   </button>
 </div>
 
 <script>
 // WhatsApp Number
-const phone = "917502382224";
+const phone = "917502382224"; // Make sure this is your number in international format, no '+'
 
+function sendWhatsApp() {
+  const name = document.getElementById("customerName").value.trim();
+  const mobile = document.getElementById("customerMobile").value.trim();
+  const address = document.getElementById("customerAddress").value.trim();
+
+  if (!name || !mobile || !address) {
+    alert("Please fill in Name, Mobile Number, and Delivery Address!");
+    return;
+  }
+
+  let message = "*DJ Brownies Order*\n";
+  message += "👤 Name: " + name + "\n";
+  message += "📱 Mobile: " + mobile + "\n";
+  message += "🏠 Address: " + address + "\n\n";
+
+  let total = 0;
+  for (let i in cart) {
+    const item = flatItems[i];
+    const qty = cart[i];
+    const cost = qty * item.price;
+    total += cost;
+    message += item.name + " x " + qty + " = ₹" + cost + "\n";
+  }
+
+  message += "\nTotal: ₹" + total;
+
+  // Encode message for URL
+  const encodedMessage = encodeURIComponent(message);
+
+  // Redirect to WhatsApp (works on mobile & desktop)
+  const url = "https://wa.me/" + phone + "?text=" + encodedMessage;
+  window.location.href = url;
+}
 // Get category from URL
 const params = new URLSearchParams(window.location.search);
 const category = params.get("cat");
@@ -125,19 +166,8 @@ function renderCart(){
 }
 
 // WhatsApp integration
-function sendWhatsApp(){
-  let msg = "🛒 *DJ Brownies Order*%0A%0A";
-  let total = 0;
-  for(let i in cart){
-    const item = menuData[category][i];
-    const qty = cart[i];
-    const cost = qty * item.price;
-    total += cost;
-    msg += `${item.name} x ${qty} = ₹${cost}%0A`;
-  }
-  msg += `%0ATotal: ₹${total}`;
-  window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
-}
+ // Make sure this is your number in international format, no '+'
+
 </script>
 
 </body>
