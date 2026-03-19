@@ -17,7 +17,8 @@
 <h1 id="title" class="text-3xl font-bold mb-6"></h1>
 
 <div id="items" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
-  <div id="cart" class="mt-6 bg-white p-4 rounded shadow"></div>
+<!-- CART DISPLAY -->
+<div id="cart" class="mt-6 bg-white p-4 rounded shadow"></div>
 <h3 class="font-bold mt-2">Total: ₹<span id="total">0</span></h3>
 
 <!-- Cart -->
@@ -41,8 +42,7 @@
 
 <script>
 // WhatsApp Number
-const phone = "917502382224"; // Make sure this is your number in international format, no '+'
-
+const phone = "917502382224";
 function sendWhatsApp() {
   const name = document.getElementById("customerName").value.trim();
   const mobile = document.getElementById("customerMobile").value.trim();
@@ -59,21 +59,29 @@ function sendWhatsApp() {
   message += "🏠 Address: " + address + "\n\n";
 
   let total = 0;
-  for (let i in cart) {
-    const item = flatItems[i];
-    const qty = cart[i];
-    const cost = qty * item.price;
-    total += cost;
-    message += item.name + " x " + qty + " = ₹" + cost + "\n";
+  let hasItems = false;
+
+  // Loop through cart keys safely using menuData[category]
+  Object.keys(cart).forEach(key => {
+    const index = parseInt(key);
+    const qty = parseInt(cart[key]);
+    if (qty > 0 && menuData[category][index]) {
+      const item = menuData[category][index];
+      const cost = qty * item.price;
+      total += cost;
+      message += `${item.name} x ${qty} = ₹${cost}\n`;
+      hasItems = true;
+    }
+  });
+
+  if (!hasItems) {
+    message += "(No items added)\n";
   }
 
   message += "\nTotal: ₹" + total;
 
-  // Encode message for URL
   const encodedMessage = encodeURIComponent(message);
-
-  // Redirect to WhatsApp (works on mobile & desktop)
-  const url = "https://wa.me/" + phone + "?text=" + encodedMessage;
+  const url = `https://wa.me/${phone}?text=${encodedMessage}`;
   window.location.href = url;
 }
 // Get category from URL
